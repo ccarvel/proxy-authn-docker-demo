@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Stolen Relations Experimental Search</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+
+  <link rel="shortcut icon" type="image/ico"
+    href="./images/sr_favicon.png" />
+
+  <!-- jQuery -->
+
+  <script
+    src="https://code.jquery.com/jquery-3.6.1.slim.min.js"
+    integrity="sha256-w8CvhFs7iHNVUtnSP0YKEg00p9Ih13rlL9zGqvLdePA="
+    crossorigin="anonymous"></script>
+
+  <!-- Bootstrap -->
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+    crossorigin="anonymous">
+  <script
+    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+    crossorigin="anonymous"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
+    integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
+    crossorigin="anonymous"></script>
+
+  <!-- Tabulator library -->
+
+  <link rel="stylesheet"
+    href="./css/tabulator_bootstrap4.min.css" />
+  <script src="./lib/tabulator.js"></script>
+
+  <!-- Lunr -->
+
+  <script src="./lib/lunr.min.js"></script>
+
+  <!-- Main setup routine -->
+
+  <script type="module" defer src="./js/main.js"></script>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Introductory text modal (initialize immediately) -->
+
+    <div class="modal" id="opening-message" data-show="true"
+      role="dialog" style="z-index:1000000">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Welcome to Stolen
+              Relations</h5>
+            <button type="button" class="close"
+              data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Please note: The headings and terms below are
+              largely derived archival documents, which
+              often
+              contain terms, phrases, and biases that
+              reduce,
+              minimize, or alter Native identities and views
+              of the world.
+            </p>
+            <p>
+              As part of our commitment to decolonize and
+              recontextualize these sources, please consult
+              the tab on the right to understand how to
+              better
+              interpret and understand the headings and
+              terms
+              given in the primary sources.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary"
+              data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    // $('#opening-message').modal();
+    // var myModal = new bootstrap.Modal(document.getElementById('myModal'), options);
+    // new bootstrap.Modal(document.getElementById('opening-message'));
+    </script>
+
+    <!-- Details modal -->
+
+    <div class="modal fade" id="details-modal" tabindex="-1"
+      role="dialog" aria-labelledby="exampleModalLongTitle"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title">
+              Details about <span
+                class="details-title-name"></span>
+            </h1>
+            <div class="badge text-bg-primary">id <span
+                id="details-id"></span></div>
+                <!--
+            {% if user_is_authenticated %}
+            <br />
+            <div class="btn-group" role="group"
+              id="modal-edit-button-group">
+              <a type="button" class="btn btn-primary"
+                id="referent-edit-link"
+                title="Edit the data for this person">
+                Edit person
+              </a>
+              <a type="button" class="btn btn-primary"
+                id="record-edit-link"
+                title="Edit the data for the record which contains a reference to this person">
+                Edit record
+              </a>
+              <a type="button" class="btn btn-primary"
+                id="source-edit-link"
+                title="Edit the bibliographic entry for the document that is the source for this information">
+                Edit source
+              </a>
+            </div>
+            {% endif %}-->
+            <button type="button" class="btn-close"
+              data-bs-dismiss="modal" aria-label="Close">
+              <!-- <span aria-hidden="true">&times;</span> -->
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="card">
+              <div class="card-header">
+                From <em id="details-doc"></em>
+              </div>
+              <div class="card-body">
+                <p class="card-text"
+                  id="details-transcription"></p>
+                <a href="" id="item-facsimile"
+                  target="_blank"
+                  class="badge text-bg-secondary"
+                  title="Link to scanned image of this document. May require permission.">
+                  Document image
+                </a>
+              </div>
+            </div>
+            <h2>Personal details</h2>
+            <table id="details-table" class="table">
+            </table>
+            <h2>About the source</h2>
+            <p style="font-style: italic">
+              A note on terminology: information about
+              individuals are recorded from "records" (such
+              as
+              an advertisement announcing a person fleeing
+              enslavement)
+              that are contained in "sources" (such as a
+              newspaper).
+            </p>
+            <table id="source-details-table" class="table">
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- "Loading ..." modal -->
+
+    <div class="modal fade" id="loadingModal"
+      data-backdrop="static" tabindex="-1" role="dialog"
+      aria-labelledby="staticBackdropLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body" id="loadingModalMessage">
+            <span class="spinner-grow spinner-grow-sm"
+              role="status" aria-hidden="true"></span>
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content container: search and results -->
+
+    <div class="col-12 mt-4" id="main-content">
+
+      <!-- Title and information header -->
+
+      <h1>
+        Stolen Relations<br />
+        <i style="font-size: 80%; color: #555">
+          Recovering Stories of Indigenous Enslavement in
+          the
+          Americas
+        </i>
+      </h1>
+
+      <div class="row">
+        <p class="col-6">
+          <em>Welcome, community collaborators!</em> This is
+          a
+          preliminary, experimental search portal of the
+          <a href="http://indigenousslavery.org">Stolen
+            Relations: Recovering Stories of Indigenous
+            Enslavement in the Americas</a>, which
+          allows you to search
+          <span id="ref-count"
+            class="badge text-bg-secondary"></span>
+          references to individuals drawn from
+          <span id="item-count"
+            class="badge text-bg-secondary"></span>
+          archival records regarding the enslavement of
+          indigenous
+          populations in the Americas, from the
+          17<sup>th</sup> to the
+          19<sup>th</sup> centuries.
+        </p>
+        <div class="col-6">
+          <p>
+            As you explore, please understand that <em>this
+              database is currently under development and
+              may
+              contain errors, and will continuously be
+              updated</em>.
+          </p>
+          <p>
+            We welcome any and all feedback, corrections,
+            and suggestions for future development &mdash;
+            please contact <a
+              href="mailto:linford_fisher@brown.edu">linford_fisher@brown.edu</a>.
+          </p>
+          <div>
+            <a
+              href="https://localcontexts.org/label/tk-community-voice/"><img
+                src="https://localcontexts.org/wp-content/uploads/2020/11/tk_label_cv.png"
+                style="width:2em" /></a>
+            <a
+              href="https://localcontexts.org/label/tk-non-commercial/"><img
+                src="https://localcontexts.org/wp-content/uploads/2020/11/tk_label_nc.png"
+                style="width:2em" /></a>
+            <a
+              href="https://localcontexts.org/label/tk-community-voice/">TK
+              Community Voice</a>, <a
+              href="https://localcontexts.org/label/tk-non-commercial/">Non-Commercial</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-column layout: query and search results on left, decolonizing frame on right -->
+
+      <div class="top-search-div row">
+
+        <div class="col-9" id="search-and-results">
+
+          <!-- Search query area -->
+
+          <div class="top-search-div row">
+            <div class="col-6">
+              <label for="general-search">
+                Search in any field for
+                <input type="text"
+                  id="general-search"></input>
+              </label>
+              <em class="text-nowrap">
+                &nbsp;(to focus your search, use the fields
+                below)
+              </em>
+            </div>
+            <div class="col-6">
+              <p id="view-options">View results as
+                <input type="radio"
+                  id="biographical-view-option"
+                  name="view-type" value="biographical"
+                  checked>
+                <label
+                  for="biographical-view-option">narratives</label>
+                <input type="radio" id="tabular-view-option"
+                  name="view-type" value="tabular">
+                <label for="tabular-view-option">a
+                  table</label>
+              </p>
+              <p>
+                <button id="download-data"
+                  title="Download the results as a CSV file">
+                  Download results
+                </button>
+              </p>
+            </div>
+          </div>
+
+          <!-- Container for data table (tabulator library output) -->
+
+          <div id="data-display"
+            class="table-borderless biographical">
+            &nbsp;
+          </div>
+        </div>
+        <div class="col-3" id="dcf">
+          <h2>Notes</h2>
+          <template id="dcf-resource-template">
+            <div class="dcf-resource card bg-light mb-3">
+              <div class="card-header">
+                <span
+                  class="dcf-number badge bg-primary text-light"
+                  hidden></span>
+                <button
+                  class="dcf-resource-title btn btn-link btn-block text-left"
+                  data-toggle="collapse"
+                  data-target="#abc"></button>
+                <!-- This is used when you want the whole header to link to the details
+
+                      <a class="dcf-resource-link card-link stretched-link" 
+                          href="#" target="_BLANK"
+                          style="font-weight: bold; font-size: 80%"
+                          title="">&nbsp;</a> -->
+                <!--
+                      <a class="dcf-resource-link card-link-x stretched-link-x" 
+                          href="#" target="_BLANK"
+                          style="font-weight: bold; font-size: 80%"
+                          title="">More</a> -->
+              </div>
+              <div id="abc"
+                class="dcf-collapsible-content collapse show"
+                data-parent="#dcf-content">
+                <div class="card-body">
+                  <img class="dcf-featured-image" src=""
+                    alt="" hidden />
+                  <span class="dcf-resource-text"></span>
+                  <a class="dcf-resource-link card-link-x stretched-link-x"
+                    href="#" target="_BLANK"
+                    style="font-weight: bold; font-size: 80%"
+                    title="Link to more context">More</a>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div id="dcf-content" class="accordion"></div>
+        </div>
+      </div>
+
+      <!-- Footer: Acknowledgements -->
+      <div class="info-box acknowledgements">
+        <h5>Acknowledgements</h5>
+        <p>Stolen Relations has been generously funded and
+          supported by <a
+            href="https://www.brown.edu/academics/population-studies/">the
+            Population
+            Studies and Training Center</a>
+          (Brown&nbsp;University), <a
+            href="https://www.brown.edu/initiatives/social-science-research/">the
+            Social
+            Sciences Research Institute</a>
+          (Brown&nbsp;University), <a
+            href="https://www.brown.edu/research/conducting-research-brown/about-office">the
+            Office
+            of the Vice President for Research</a>
+          (Brown&nbsp;University), <a
+            href="https://cssj.brown.edu/">the Center
+            for the Study of Slavery and Justice</a>
+          (Brown&nbsp;University), and <a
+            href="http://cds.library.brown.edu/">the Center
+            for
+            Digital Scholarship</a>
+          (Brown&nbsp;University&nbsp;Library)</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

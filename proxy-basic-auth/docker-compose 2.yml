@@ -1,0 +1,18 @@
+services:
+ # REVERSE PROXY--when run alone, localhost should resolve to the NGINX welcome page
+    reverseproxy:
+      image: nginx:latest
+      container_name: "reverseproxy"
+      ports:
+        - "8001:80"
+#        - "443:443"
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf
+        - ./proxy.conf:/etc/nginx/conf.d/proxy.conf
+        - ./.htpasswd:/etc/nginx/.htpasswd
+    esearch:
+      image: nginx:alpine
+      volumes:
+        - .:/usr/share/nginx/html/
+      expose:
+        - "8000:80"

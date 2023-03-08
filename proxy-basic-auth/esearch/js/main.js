@@ -1,0 +1,179 @@
+
+import { srGlobalObject as sr }     from './global-object.js';
+import { getShowDetailsFunction }   from './details-modal.js';
+import { getGeneralSearch }         from '../lib/lunr.js';
+import { getTableRenderer }         from './init-table.js';
+import { getDcfUpdateHandler }      from './dcf.js';
+import { getSearchStateObject }     from './dcf-search-state.js';
+
+function main() {
+
+  // MAIN ARCHITECTURAL COMPONENTS
+
+  const showDetailsFunction = getShowDetailsFunction(sr),
+        generalSearch = getGeneralSearch(sr),
+        table = getTableRenderer(sr, showDetailsFunction, generalSearch),
+        searchState = getSearchStateObject(table, generalSearch),
+        dcfContentElem = document.getElementById(sr.CF_CONTENT_ID),
+        updateDcf = getDcfUpdateHandler(searchState, dcfContentElem, table);
+        
+  window.DCF = {searchState, updateDcf, table}; // @todo temp for debugging
+
+  // EVENT HANDLERS
+
+  // Get DOM elements
+
+  const bioViewOption = document.getElementById(sr.BIO_VIEW_SELECTOR_ID),
+        viewSelector = document.getElementById(sr.VIEW_OPTIONS_RADIO_BUTTONS_ID),
+        downloadButton = document.getElementById(sr.DOWNLOAD_BUTTON_ID),
+        generalSearchInput = document.getElementById(sr.GENERAL_SEARCH_INPUT_ID),
+        contextFrame = document.getElementById(sr.CF_CONTENT_ID);
+
+  // Handle re-rendering in Tabulator (update DCF)
+
+  window.addEventListener('tabulator-render', updateDcf);
+  window.addEventListener('tabulator-scroll', function() {
+    if (table.visibleDataChanged()) {
+      updateDcf();
+    }
+  });
+  updateDcf();
+
+  // Handle DCF content collapse / expand
+
+  console.log('PPPPPPPPxxx', contextFrame);
+  //contextFrame.addEventListener('hidden.bs.collapse', function () {
+  contextFrame.addEventListener('hidden.bs.collapse', function () {
+    console.log('COLLAPSING!!!');''
+  });
+
+  // Handle change of view
+
+  viewSelector.addEventListener('click', () => {
+    const tableMode = bioViewOption.checked ? 'BIOGRAPHICAL' : 'TABULAR';
+    table.switchMode(tableMode);
+  });
+
+  // Handle download button click
+
+  downloadButton.addEventListener('click', table.download);
+
+  // Handle change in general search field
+
+  generalSearchInput.addEventListener('change', () => {
+    generalSearch.searchFor(generalSearchInput.value);
+    table.refresh();
+  });
+
+  // GLOBAL FUNCTIONS - referred to in generated markup
+
+  // Functions called by linked entries in Biographical listing
+  // (e.g. click on "Elizabeth" to populate the name field with "Elizabeth")
+
+  window.populateFilter = function(filterId, value) {
+    table.setHeaderFilterValue(filterId, value);
+  }
+  // NOTE Above replaces those below - can I erase these??
+  window.populateTribeFilter = function(tribeName) {
+    table.setHeaderFilterValue('all_tribes', tribeName);
+  }
+
+  window.populateNameFilter = function(nameSearchText) {
+    table.setHeaderFilterValue('all_name', nameSearchText);
+  }
+
+  window.populateLocationFilter = function(locationSearchText) {
+    table.setHeaderFilterValue('reference_data.all_locations', locationSearchText);
+  }
+
+  // Show details as a global function
+  // (referenced in generated markup)
+
+  window.showDetails = showDetailsFunction;
+}
+
+
+main();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* DATA STRUCTURE FOR REFERENCE
+
+{
+  "referent_db_id": 317,
+  "referent_uuid": "(not-recorded)",
+  "name_first": "Nelly",
+  "name_last": "",
+  "tribes": ['abc'],
+  "all_tribes": "abc",
+  "sex": "Female",
+  "origins": [],
+  "vocations": [],
+  "age": "13",
+  "races": ["Indian"],
+  "all_races": "Indian",
+  "roles": [
+    "Enslaved"
+  ],
+  "titles": [],
+  "statuses": [
+    "Slave"
+  ],
+  "citation_data": {
+    "citation_db_id": 97,
+    "citation_uuid": "(not-recorded)",
+    "citation_type": "Document",
+    "display": "“Return of the Registry of Indians on the Mosquito Shore in the year 1777.” TNA, CO 123/31/123-132.",
+    "comments": ""
+  },
+  "reference_data": {
+    "reference_db_id": 146,
+    "reference_uuid": "(not-recorded)",
+    "reference_type": "Inventory",
+    "national_context": "British",
+    "date_db": "1777-02-26 00:00:00",
+    "date_display": "1777 February 26",
+    "transcription": "[QUOT]At the Corn Islands at Cape Gracias a Dios at Black River[QUOT]; Same owner as Hemimo, Loraina, [AMP] Alinaes",
+    "locations": [
+      {
+        "location_name": "Mosquito Coast",
+        "location_type": null
+      },
+      {
+        "location_name": "British Honduras",
+        "location_type": "Colony/State"
+      }
+    ],
+    "all_locations": "Mosquito Coast, British Honduras"
+  },
+  "relationships": [
+    {
+      "description": "enslaved by",
+      "related_referent_info": {
+        "related_referent_db_id": 318,
+        "related_referent_first_name": "Robert",
+        "related_referent_last_name": "Hodgson"
+      }
+    }
+  ],
+  "all_name": "Nelly",
+  "enslavement_status": "Enslaved",
+  "all_origins": "",
+  "year": 1777
+}
+
+*/
+
